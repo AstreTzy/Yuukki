@@ -2,20 +2,23 @@ const bird = document.querySelector(".bird");
 const message = document.querySelector(".message");
 const scoreVal = document.querySelector(".score_val");
 
-let birdY = 200;
-let gravity = 1.5;
-let velocity = 0;
-let gameStarted = false;
-let score = 0;
-let gameLoop;
+// Cargar audio
+const jumpSound = new Audio("audio/jump.mp3");
+jumpSound.load();
 
-// Función para iniciar el juego
+let birdY = 200;
+let velocity = 0;
+let gravity = 1.5;
+let gameStarted = false;
+let gameLoop;
+let score = 0;
+
 function startGame() {
   message.style.display = "none";
-  gameStarted = true;
   birdY = 200;
   velocity = 0;
   score = 0;
+  gameStarted = true;
   bird.style.top = birdY + "px";
   scoreVal.textContent = score;
 
@@ -26,44 +29,38 @@ function startGame() {
     birdY += velocity;
     bird.style.top = birdY + "px";
 
-    // Termina si se sale de pantalla
     if (birdY > window.innerHeight - 60 || birdY < 0) {
       endGame();
     }
 
-    // Aumenta puntuación con el tiempo
     score++;
     scoreVal.textContent = score;
   }, 20);
 }
 
-// Salto del pájaro
 function fly() {
   if (!gameStarted) return;
   velocity = -10;
+
+  // Reproduce el sonido
+  jumpSound.currentTime = 0;
+  jumpSound.play().catch(e => {
+    console.log("No se pudo reproducir el sonido:", e);
+  });
 }
 
-// Terminar juego
 function endGame() {
   clearInterval(gameLoop);
-  message.innerHTML = `Game Over<br>Puntuación: ${score}<br><small>Toca para reiniciar</small>`;
-  message.style.display = "block";
   gameStarted = false;
+  message.innerHTML = `Game Over<br>Puntuación: ${score}<br><small>Toca para volver a jugar</small>`;
+  message.style.display = "block";
 }
 
-// 👇 ESCUCHA TOQUES Y CLICS
+// Escuchar toque en móviles y clic en PC
 document.body.addEventListener("touchstart", () => {
-  if (!gameStarted) {
-    startGame();
-  } else {
-    fly();
-  }
+  gameStarted ? fly() : startGame();
 });
 
 document.body.addEventListener("mousedown", () => {
-  if (!gameStarted) {
-    startGame();
-  } else {
-    fly();
-  }
+  gameStarted ? fly() : startGame();
 });
